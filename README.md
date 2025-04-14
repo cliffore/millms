@@ -7,7 +7,7 @@ This repository is tailored to a specific set of inputs and ground-truth mapping
 
 ---
 
-## 🚀 Explanation
+## 🛠️ Explanation
 
 1: Java executable millm-owlapi-1 is executed via the command line and takes a folder name which is the location of the raw ontology.owl files. The Java process takes each owl ontology, parses it using the OWLAPI library and extracts class relationships and properties, and generates a CSV file representing the structure and semantics of the ontology classes. The parameter 'level' can be supplied as either 's' or 'v' which guides the output to be a summary (s) or verbose (v). The IntelliJ Java maven project code is included in the repository (/millm-owlapi-1).
 
@@ -20,7 +20,7 @@ The output of this process should be a single csv file in the format {owl ontolo
 
 ---
 
-## 🛠️ Usage
+## 🚀 Usage
 
 ### Requirements
 
