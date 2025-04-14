@@ -55,12 +55,14 @@ To process this experiment using the included ontologies:
 
     gh repo clone https://github.com/cliffore/millm.git
 
+
     cd millm
 
 
 2: Execute the Java program, e.g.
 
     cd millm-owlapi-4/target
+    
 
     java -jar millm-owlapi.jar "/full/path/to/folder" v
 
