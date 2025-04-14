@@ -1,4 +1,4 @@
-# Mechanistic Interpretability - Large Language Models (MILLM)
+# Mechanistic Interpretability - Large Language Models (MILLMs)
 
 This repository contains data and application code to prepare, process and output a PhD experiment in mechanistic intepretability.
 
