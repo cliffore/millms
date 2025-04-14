@@ -38,9 +38,9 @@ The output of this process should be a single csv file in the format {owl ontolo
     re
     pandas
 
-3: Java 24 and the following libraries
+3: Java 24 and the following libraries:
 
-    OWLAPI (this project uses Maven to manage this library)
+    OWLAPI (the included Intellij project uses Maven to manage this library)
 
 
 Any other configuration may work, but cannot be supported in advance.
