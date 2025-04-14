@@ -67,6 +67,13 @@ To process this experiment using the included ontologies:
     
     python make-ref-align.py
 
+
+4: Execute the Python script to enter each prompt through the suite of SAEs, e.g.
+    
+    python run-saes.py
+
+
+
 ### Making changes
 
 1: To update this process to use a different source, change the Java code to parse the source owl files differently (and build the jar artifact again if needed) and also the make-ref-align.py script that parses the 
