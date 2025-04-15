@@ -72,7 +72,7 @@ To process this experiment using the included ontologies:
 
     python set-experiments.py
 
-\
+
 5: Execute the Python script to enter each prompt through the suite of SAEs, e.g.
     
     python run-saes.py
