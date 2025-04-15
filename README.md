@@ -68,7 +68,12 @@ To process this experiment using the included ontologies:
     python make-ref-align.py
 
 
-4: Execute the Python script to enter each prompt through the suite of SAEs, e.g.
+4: Execute the Python script to create a new experiment folder and move the data files into it, e.g.
+
+    python set-experiments.py
+
+\
+5: Execute the Python script to enter each prompt through the suite of SAEs, e.g.
     
     python run-saes.py
 
