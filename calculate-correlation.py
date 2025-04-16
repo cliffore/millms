@@ -26,10 +26,10 @@ print(ex_folder)
 
 
 # ==== CONFIGURATION ====
-csv_path = ex_folder + "/all_distances_optimized.csv"
+csv_path = ex_folder + "/distances_with_groundtruth.csv"
 
 # === LOAD CSV (no header) ===
-df = pd.read_csv(csv_path, header=None)
+df = pd.read_csv(csv_path, header=1)
 
 # === Extract last two columns ===
 df = df.iloc[:, -2:]  # Get last two columns only

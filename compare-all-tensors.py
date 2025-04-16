@@ -34,17 +34,16 @@ eng = []
 fre = []
 
 for file_name in file_list:
-    if '--fr' in file_name:
-        fre.append(file_name)
-    else:
-        eng.append(file_name)
-
+    if 'DS_Store' not in file_name:
+        if '-fr-' in file_name:
+            fre.append(file_name)
+        else:
+            eng.append(file_name)
 
 for fe in eng:
 
     engs = fe.split("--")
     eontoclass = engs[2]
-
 
     file1_path = os.path.join(data_folder, fe)
     t1 = np.load(file1_path)

@@ -1,10 +1,19 @@
 import os
+import re
 import numpy as np
 import pandas as pd
-from sklearn.metrics import pairwise_distances
-import re
+from itertools import combinations
+from scipy.spatial.distance import euclidean
 
 
+def resize_vector(vec, target_length):
+    if len(vec) == target_length:
+        return vec
+    elif len(vec) > target_length:
+        return vec[:target_length]
+    else:
+        return np.pad(vec, (0, target_length - len(vec)))
+    
 def get_latest_ex_folder(folder_path):
     pattern = re.compile(r"^ex_(\d+)$")
     max_id = -1
@@ -24,57 +33,57 @@ def get_latest_ex_folder(folder_path):
 
 # Run it
 ex_folder = get_latest_ex_folder("data-processing/experiments")
-print(ex_folder)
-
 data_folder = ex_folder + "/data"
+print(data_folder)
 
 
-# === CONFIGURATION ===
-output_file = ex_folder + "/all_distances_optimized.csv"
+# Paths (update as needed)
+#npy_folder = "/path/to/npy/folder"
+ground_truth_file = ex_folder + "/all_mappings.csv"
+output_csv = ex_folder + "/distances_with_groundtruth.csv"
 
-# === Load and filter tensors ===
-concepts = {}
-params_map = {}
-
+# Load all .npy files and map concept name to tensor
+concept_tensors = {}
 for fname in os.listdir(data_folder):
-    if fname.endswith(".npy"):
-        if "weighted_avg" in fname:
-            parts = fname.replace(".npy", "").split("--")
-            class_name = parts[2]
-            concept_name = class_name
-            tensor = np.load(os.path.join(data_folder, fname))
-            concepts[concept_name] = tensor
-            params_map[concept_name] = (class_name, avtype, vs, hr)
+    if fname.endswith(".npy") and  "weighted_avg" in fname:
+        concept = fname.replace(".npy", "")  # e.g., "edas-Author"
+        tensor = np.load(os.path.join(data_folder, fname))
+        concept_tensors[concept] = tensor
 
-# === Pad all tensors to the same shape and flatten ===
-concept_names = sorted(concepts.keys())
-tensors = [concepts[name] for name in concept_names]
-max_len = max(t.shape[0] for t in tensors)
-tensor_matrix = np.array([
-    np.pad(t, (0, max_len - t.shape[0])) for t in tensors
-])
+# Load ground truth into a dictionary for fast lookup
+# Format: {("edas-Author", "ekaw-Paper_Author"): 1.0}
+ground_truth = {}
+df_gt = pd.read_csv(ground_truth_file, header=1, names=["file", "entity1", "entity2", "weighting"])
 
-# === Compute pairwise Euclidean distances ===
-distance_matrix = pairwise_distances(tensor_matrix, metric='euclidean')
+for _, row in df_gt.iterrows():
+    src1, src2 = row["file"].replace(".rdf", "").split("-")
+    c1 = f"{src1}-{row['entity1']}"
+    c2 = f"{src2}-{row['entity2']}"
+    ground_truth[(c1, c2)] = int(row["weighting"])
+    ground_truth[(c2, c1)] = int(row["weighting"])  # make symmetric
 
-# === Generate output rows (avoid self-comparison & same-class pairs) ===
-rows = []
-for i, name1 in enumerate(concept_names):
-    class1 = params_map[name1][0]
-    for j in range(i + 1, len(concept_names)):
-        name2 = concept_names[j]
-        class2 = params_map[name2][0]
-        if class1 != class2:
-            dist = distance_matrix[i, j]
-            row = [
-                ",".join(params_map[name1]),
-                ",".join(params_map[name2]),
-                dist
-            ]
-            rows.append(row)
+# Calculate distances between all unique pairs
+results = []
 
-# === Save results to CSV ===
-df = pd.DataFrame(rows, columns=["params1", "params2", "euclidean_distance"])
-df.to_csv(output_file, index=False)
 
-print(f"Euclidean distance comparisons complete. Output saved to:\n{output_file}")
+cnt = 0
+for (concept1, tensor1), (concept2, tensor2) in combinations(concept_tensors.items(), 2):
+    cnt = cnt + 1
+    print(cnt)
+    if tensor1.shape != tensor2.shape:
+        target_len = max(len(t) for t in concept_tensors.values())
+        tensor1 = resize_vector(tensor1, target_len)
+        tensor2 = resize_vector(tensor2, target_len)
+
+    dist = euclidean(tensor1, tensor2)
+    c1 = concept1.split('--')[3]
+    c2 = concept2.split('--')[3]
+    gt = ground_truth.get((c1, c2), 0)
+    results.append([c1, c2, dist, gt])
+
+
+# Write to CSV
+output_df = pd.DataFrame(results, columns=["concept1", "concept2", "distance", "ground_truth"])
+output_df.to_csv(output_csv, index=False)
+
+print(f"Saved distances and ground truth to: {output_csv}")
