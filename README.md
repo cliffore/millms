@@ -101,7 +101,7 @@ This script can be executed many times and will take the highest number experime
     python calculate-distances.py
     
     
-9. Execute the python script that takes the averages and then correlates them and outputs a measure of the relationship, e.g.
+9: Execute the python script that takes the averages and then correlates them and outputs a measure of the relationship, e.g.
 
     python calculate-correlation.py
 
