@@ -22,6 +22,8 @@ The output of this process should be a single csv file in the format {owl ontolo
 
 ## 🚀 Usage
 
+
+
 ### Requirements
 
 1: This experiment has been run successfully on Mac OS running Sequioa 15.3.2
@@ -37,6 +39,8 @@ The output of this process should be a single csv file in the format {owl ontolo
     IPython.display
     re
     pandas
+    sklearn
+    scipy
 
 3: Java 24 and the following libraries:
 
@@ -46,20 +50,22 @@ The output of this process should be a single csv file in the format {owl ontolo
 Any other configuration may work, but cannot be supported in advance.
 
 
+
+
 ### Steps
 
 To process this experiment using the included ontologies:
 
 
-1: Clone this repository, e.g. 
+1: Clone this repository, e.g. s
 
     gh repo clone https://github.com/cliffore/millm.git
-    cd millm
+    cd millms
 
 
 2: Execute the Java program, e.g.
 
-    cd millm-owlapi/out/artifacts/millms_owlapi_jar
+    cd millms-owlapi/out/artifacts/millms_owlapi_jar
     java -jar millms-owlapi.jar v
 
 
@@ -70,15 +76,40 @@ To process this experiment using the included ontologies:
 
 4: Execute the Python script to create a new experiment folder and move the data files into it, e.g.
 
-    python set-experiments.py
+    python set-experiment.py
 
 
-5: Execute the Python script to enter each prompt through the suite of SAEs, e.g.
+5: Execute the python script to convert each prompt in the experiment source csv files into French:
+
+    python translate.py
+
+
+6: Execute the Python script to enter each prompt through the suite of SAEs, e.g.
     
     python run-saes.py
+
+This script can be executed many times and will take the highest number experiment folder.
+
+
+7: Execute the python script that takes each tensor from the SAE and creates a set of comparisons, such as weighted average vector, simple vector:
+
+    python compare-all-tensors.py
+
+
+8: Execute the python script that takes the averages and then calculates the distances between vectors, e.g.
+
+    python calculate-distances.py
+    
+    
+9. Execute the python script that takes the averages and then correlates them and outputs a measure of the relationship, e.g.
+
+    python calculate-correlation.py
+
 
 
 
 ### Making changes
 
-1: To update this process to use a different source, change the Java code to parse the source owl files differently (and build the jar artifact again if needed) and also the make-ref-align.py script that parses the 
+1: To update this process to use a different source, change the Java code to parse the source owl files as needed (and build the jar artifact again if needed) and also change the make-ref-align.py script that parses the particular format of the ground truth raw data.
+2: To run this code on a non-Apple Silicon machine, change the run-saes.py script and replace "mps" with whichever Pytorch chip needed, e.g. "cude" or just "cpu"
+

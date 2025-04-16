@@ -33,3 +33,8 @@ for file_name in os.listdir(source_folder):
         moved_files += 1
 
 print(f"Moved {moved_files} CSV file(s) to: {new_folder_path}")
+
+new_folder_path_data = os.path.join(new_folder_path, "data")
+os.makedirs(new_folder_path_data, exist_ok=True)
+
+print(f"Created new folder for data: " + new_folder_path_data)
