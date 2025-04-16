@@ -111,5 +111,6 @@ This script can be executed many times and will take the highest number experime
 ### Making changes
 
 1: To update this process to use a different source, change the Java code to parse the source owl files as needed (and build the jar artifact again if needed) and also change the make-ref-align.py script that parses the particular format of the ground truth raw data.
+
 2: To run this code on a non-Apple Silicon machine, change the run-saes.py script and replace "mps" with whichever Pytorch chip needed, e.g. "cuda" or just "cpu"
 
