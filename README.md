@@ -59,8 +59,8 @@ To process this experiment using the included ontologies:
 
 2: Execute the Java program, e.g.
 
-    cd millm-owlapi-4/target
-    java -jar millm-owlapi.jar "/full/path/to/folder" v
+    cd millm-owlapi/out/artifacts/millms_owlapi_jar
+    java -jar millms-owlapi.jar v
 
 
 3: Execute the Python script to create the groung truth mappings, e.g. 
