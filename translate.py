@@ -66,7 +66,7 @@ for csv_file in finputs:
         cn = cn + 1
 
 
-    outfile = csv_file.replace(".csv", "--fr.csv")
+    outfile = csv_file.replace(".csv", "-fr.csv")
     with open(outfile, 'w') as file:
         file.write(output)
 

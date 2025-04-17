@@ -15,7 +15,7 @@ The output of this process should be a single csv file in the format {owl ontolo
 
 2: Python script make-ref-align.py is executed via the command line (e.g. python make-ref-align.py) and it will look for source mapping files in the input-data/ground-truth folder. This script will output a single file called all_mappings.csv and it will be in the format {source mapping file},{class 1},{class 2},{match weighting}.
 
-3: Python script ....py is executed via the command line and 
+3: Python script ....
 
 
 ---
