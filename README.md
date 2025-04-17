@@ -99,16 +99,19 @@ This script can be executed many times and will take the highest number experime
     python compare-all-tensors.py
 
 
-8: Execute the python script that takes the averages and then calculates the distances between vectors, e.g.
+8: Execute the Python script that takes the averages and then calculates the distances between vectors, e.g.
 
     python calculate-distances.py
     
     
-9: Execute the python script that takes the averages and then correlates them and outputs a measure of the relationship, e.g.
+9: Execute the Python script that takes the averages and then correlates them and outputs a measure of the relationship, e.g.
 
     python calculate-correlation.py
 
 
+10: Execute the Python script to output the final report, e.g.
+
+    <create script here>
 
 
 ### Making changes
