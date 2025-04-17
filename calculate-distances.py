@@ -76,8 +76,8 @@ for (concept1, tensor1), (concept2, tensor2) in combinations(concept_tensors.ite
         tensor2 = resize_vector(tensor2, target_len)
 
     dist = euclidean(tensor1, tensor2)
-    c1 = concept1.split('--')[2]
-    c2 = concept2.split('--')[2]
+    c1 = concept1.split('--')[4]
+    c2 = concept2.split('--')[4]
     gt = ground_truth.get((c1, c2), 0)
     results.append([c1, c2, dist, gt])
 
