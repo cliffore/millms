@@ -73,6 +73,7 @@ To process this experiment using the included ontologies:
 
 3: Execute the Python script to create the groung truth mappings, e.g. 
     
+    cd ../../../..
     python make-ref-align.py
 
 
