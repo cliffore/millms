@@ -57,10 +57,12 @@ Any other configuration may work, but cannot be supported in advance.
 To process this experiment using the included ontologies:
 
 
-1: Clone this repository, e.g. s
+1: Clone this repository and create new folders, e.g. s
 
     gh repo clone https://github.com/cliffore/millm.git
     cd millms
+    mkdir data-processing
+    mkdir data-processing/experiments
 
 
 2: Execute the Java program, e.g.
