@@ -56,7 +56,7 @@ ground_truth = {}
 df_gt = pd.read_csv(ground_truth_file, header=1, names=["file", "entity1", "entity2", "weighting"])
 
 for _, row in df_gt.iterrows():
-    src1, src2 = row["file"].replace(".rdf", "").split("-")
+    src1, src2 = row["file"].split("-")
     c1 = f"{src1}-{row['entity1']}"
     c2 = f"{src2}-{row['entity2']}"
     ground_truth[(c1, c2)] = int(row["weighting"])

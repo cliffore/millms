@@ -38,7 +38,7 @@ for filename in os.listdir(input_folder):
                         weighting = measure_elem.text
                         print(weighting)
                         if entity1 and entity2:
-                            rows.append([filename, entity1.split('#')[1], entity2.split('#')[1], str(weighting)])
+                            rows.append([filename.replace('.rdf', ''), entity1.split('#')[1], entity2.split('#')[1], str(weighting)])
                             print(rows) 
         except Exception as e:
             print(f"Failed to parse {filename}: {e}")
