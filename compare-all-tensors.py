@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import re
+import torch
 
 def get_latest_ex_folder(folder_path):
     pattern = re.compile(r"^ex_(\d+)$")
@@ -47,7 +48,7 @@ for fe in eng:
 
     file1_path = os.path.join(data_folder, fe)
     t1 = np.load(file1_path)
-    tensor1 = t1[0][1:]  # shape (n1, 2)# [1:] = remove the first vector of the tensor because it represents an outlier - the BOS token
+    tensor1 = torch.tensor(t1[0][1:])  # shape (n1, 2)# [1:] = remove the first vector of the tensor because it represents an outlier - the BOS token
 
 
     for ff in fre: # english comparison with french
@@ -64,47 +65,33 @@ for fe in eng:
 
             file2_path = os.path.join(data_folder, ff)
             t2 = np.load(file2_path)
-            tensor2 = t2[0][1:] # [1:] = remove the first vector of the tensor because it represents an outlier - the BOS token
+            tensor2 = torch.tensor(t2[0][1:]) # [1:] = remove the first vector of the tensor because it represents an outlier - the BOS token
 
+            # Flatten and concatenate
+            data = torch.cat((tensor1.view(-1, 2), tensor2.view(-1, 2)), dim=0)
 
-            # Step 2: Build dictionaries {class_id: weight}
-            dict1 = {int(row[0]): row[1] for row in tensor1}
-            dict2 = {int(row[0]): row[1] for row in tensor2}
+            # Split into concept IDs and weights
+            concept_ids = data[:, 0]
+            weights = data[:, 1]
 
-            # Step 3: Simple average — only for matching class IDs
-            '''common_classes = sorted(set(dict1.keys()) & set(dict2.keys()))
+            # Use a dictionary to accumulate weights
+            from collections import defaultdict
 
-            if not common_classes:
-                print("No common classes between the two tensors (after removing first row).")
-                simple_avg_vector = np.array([])
-            else:
-                simple_avg_vector = np.array([
-                    (dict1[cls] + dict2[cls]) / 2 for cls in common_classes
-                ])
-            '''
+            sums = defaultdict(float)
+            counts = defaultdict(int)
 
-            # Step 4: Weighted average — use all class IDs
-            all_classes = sorted(set(dict1) | set(dict2))
-            weighted_avg_vector = []
+            for cid, weight in zip(concept_ids, weights):
+                cid = int(cid.item())
+                sums[cid] += weight.item()
+                counts[cid] += 1
 
-            for cls in all_classes:
-                w1 = dict1.get(cls, 0.0)
-                w2 = dict2.get(cls, 0.0)
-                if w1 > 0 and w2 > 0:
-                    weighted_avg = (cls * w1 + cls * w2) / (w1 + w2)
-                elif w1 > 0:
-                    weighted_avg = cls
-                else:
-                    weighted_avg = cls
-                weighted_avg_vector.append(weighted_avg)
+            # Compute average
+            avg_weighted = sorted([(cid, sums[cid] / counts[cid]) for cid in sums])
 
-            weighted_avg_vector = np.array(weighted_avg_vector)
+            # Convert to tensor
+            avg_tensor = torch.tensor(avg_weighted)
+
+            print(avg_tensor)
 
             newFileName =  "weighted_avg--fve--" + fe.replace(".npy", "")
-            np.save(os.path.join(data_folder, newFileName + ".npy"), weighted_avg_vector)
-
-            #newFileName = "sa--fve--" + fe
-            #np.save(os.path.join(data_folder + "_means", newFileName + ".npy"), simple_avg_vector)
-
-
-
+            np.save(os.path.join(data_folder, newFileName + ".npy"), avg_tensor)

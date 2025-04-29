@@ -173,7 +173,7 @@ for csv_file in finputs:
                                 return target_act
 
 
-                            target_act = gather_residual_activations(model, 20, inputs)
+                            target_act = gather_residual_activations(model, 0, inputs)
 
                             sae.to(device)
 
@@ -199,7 +199,7 @@ for csv_file in finputs:
                             print("highest activating feature on each token:")
                             print(inds)
 
-                            paired_tensor = torch.stack((activs, values), dim=2)
+                            paired_tensor = torch.stack((inds, values), dim=2)
 
                             print(concepts[p])
                             print(file)
