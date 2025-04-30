@@ -35,17 +35,30 @@ df = pd.read_csv(csv_path, header=1)
 df = df.iloc[:, -2:]  # Get last two columns only
 df.columns = ['value', 'target']
 
-
-print("Target value counts:")
+# === Print original counts ===
+print("Original Target value counts:")
 print(df['target'].value_counts())
-
 
 # === Ensure target is binary ===
 if not set(df['target']).issubset({0, 1}):
     raise ValueError("Target variable must be binary (0 or 1).")
 
-# === Calculate Point-Biserial Correlation ===
-corr, p_value = pointbiserialr(df['target'], df['value'])
+# === Balance the dataset by downsampling class 0 ===
+n_positives = df[df['target'] == 1].shape[0]
+positives = df[df['target'] == 1]
+negatives = df[df['target'] == 0]
+negatives_sampled = negatives.sample(n=n_positives, random_state=42)
+
+# Combine and shuffle
+df_balanced = pd.concat([positives, negatives_sampled])
+df_balanced = df_balanced.sample(frac=1, random_state=42).reset_index(drop=True)
+
+# === Print balanced counts ===
+print("Balanced Target value counts:")
+print(df_balanced['target'].value_counts())
+
+# === Calculate Point-Biserial Correlation on balanced data ===
+corr, p_value = pointbiserialr(df_balanced['target'], df_balanced['value'])
 
 # === Output ===
 print("Point-Biserial Correlation Analysis")
