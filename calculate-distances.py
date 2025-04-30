@@ -1,9 +1,13 @@
+
 import os
 import re
 import numpy as np
 import pandas as pd
 from itertools import combinations
 from scipy.spatial.distance import euclidean
+import torch
+from scipy.stats import wasserstein_distance
+
 
 
 def resize_vector(vec, target_length):
@@ -65,6 +69,17 @@ for _, row in df_gt.iterrows():
 # Calculate distances between all unique pairs
 results = []
 
+def tensor_to_dense(tensor, vocab):
+    dense = torch.zeros(len(vocab))
+    id_to_index = {cid: i for i, cid in enumerate(vocab)}
+    for row in tensor:
+        cid = int(row[0].item())
+        weight = row[1].item()
+        dense[id_to_index[cid]] = weight
+    return dense
+
+
+
 
 cnt = 0
 for (concept1, tensor1), (concept2, tensor2) in combinations(concept_tensors.items(), 2):
@@ -75,7 +90,32 @@ for (concept1, tensor1), (concept2, tensor2) in combinations(concept_tensors.ite
         tensor1 = resize_vector(tensor1, target_len)
         tensor2 = resize_vector(tensor2, target_len)
 
-    dist = euclidean(tensor1, tensor2)
+    '''
+    # Suppose you have two tensors: tensorA and tensorB
+    # Build combined vocabulary
+    vocab = sorted(set(tensor1[:, 0].tolist()) | set(tensor2[:, 0].tolist()))
+
+    denseA = tensor_to_dense(tensor1, vocab)
+    denseB = tensor_to_dense(tensor2, vocab)
+
+    # Euclidean distance
+    euclidean = torch.norm(denseA - denseB)
+    # Cosine similarity
+    cosine = torch.nn.functional.cosine_similarity(denseA.unsqueeze(0), denseB.unsqueeze(0)).item()
+    '''
+
+    a_ids = tensor1[:, 0]
+    a_weights = tensor1[:, 1]
+    b_ids = tensor2[:, 0]
+    b_weights = tensor2[:, 1]
+
+    emd = wasserstein_distance(
+        u_values=a_ids, v_values=b_ids,
+        u_weights=a_weights, v_weights=b_weights
+    )
+
+    dist = emd
+    #dist = euclidean(tensor1, tensor2)
     c1 = concept1.split('--')[4]
     c2 = concept2.split('--')[4]
     gt = ground_truth.get((c1, c2), 0)
@@ -87,3 +127,5 @@ output_df = pd.DataFrame(results, columns=["concept1", "concept2", "distance", "
 output_df.to_csv(output_csv, index=False)
 
 print(f"Saved distances and ground truth to: {output_csv}")
+
+
