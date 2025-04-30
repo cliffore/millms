@@ -90,7 +90,7 @@ for (concept1, tensor1), (concept2, tensor2) in combinations(concept_tensors.ite
         tensor1 = resize_vector(tensor1, target_len)
         tensor2 = resize_vector(tensor2, target_len)
 
-    '''
+    
     # Suppose you have two tensors: tensorA and tensorB
     # Build combined vocabulary
     vocab = sorted(set(tensor1[:, 0].tolist()) | set(tensor2[:, 0].tolist()))
@@ -102,19 +102,20 @@ for (concept1, tensor1), (concept2, tensor2) in combinations(concept_tensors.ite
     euclidean = torch.norm(denseA - denseB)
     # Cosine similarity
     cosine = torch.nn.functional.cosine_similarity(denseA.unsqueeze(0), denseB.unsqueeze(0)).item()
-    '''
 
+    '''
     a_ids = tensor1[:, 0]
     a_weights = tensor1[:, 1]
     b_ids = tensor2[:, 0]
     b_weights = tensor2[:, 1]
-
+    
     emd = wasserstein_distance(
         u_values=a_ids, v_values=b_ids,
         u_weights=a_weights, v_weights=b_weights
     )
+    '''
 
-    dist = emd
+    dist = cosine
     #dist = euclidean(tensor1, tensor2)
     c1 = concept1.split('--')[4]
     c2 = concept2.split('--')[4]
