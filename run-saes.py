@@ -129,8 +129,13 @@ if layer_to_use >= 0 and layer_to_use < 26:
             cf = cf + 1
             if "layer_" in file:
                 this_layer = file.split("layer_")[1].split("/")[0]
-                print(this_layer)
-                if this_layer==layer_to_use:
+
+                if str(this_layer)==str(layer_to_use):
+                    print("this layer:" + str(this_layer))
+                    print("layer to use:" + str(layer_to_use))
+                    print(file)
+                    this_location=file.split("average_l0_")[1].split("/")[0]
+                    print(this_location)
                     if 'width_16k/average_l0_13' in file:
                         if 'README' not in file:
                             print(str(cf) + " >> " + file)
