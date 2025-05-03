@@ -25,7 +25,7 @@ python translate.py
 
 # put the prompts through the SAE
 echo "Push the prompts through the SAE..."
-python run-saes.py --layer="$INPUT_FILE"
+python run-saes.py --layer=$INPUT_FILE
 
 # calculate all the vector distances
 echo "Calculate the vector distances between concept arrays..."

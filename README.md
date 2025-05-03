@@ -58,17 +58,6 @@ Any other configuration may work, but cannot be supported in advance.
 
 To process this experiment using the included ontologies:
 
-1: Use the bash script to run all the necessary steps in one go. Pass in the layer parameter into the script, e.g.
-
-    chmod +x run_all.sh
-    ./run_all.sh 1
-
-
-
-
-Alternatively, to run each step in turn, follow this:
-
-
 1: Clone this repository and create new folders, e.g. s
 
     gh repo clone https://github.com/cliffore/millms.git
@@ -77,53 +66,57 @@ Alternatively, to run each step in turn, follow this:
     mkdir data-processing/experiments
 
 
-2: Execute the Java program, e.g.
+2: Use the bash script to run all the necessary steps in one go. Pass in the layer parameter into the script (depending on permissions, run chmod +x run_all.sh first), e.g.
+
+    ./run_all.sh 1
+
+Alternatively, to run each step in turn, follow this:
+
+
+
+3: Execute the Java program, e.g.
 
     cd millms-owlapi/out/artifacts/millms_owlapi_jar
     java -jar millms-owlapi.jar v
 
 
-3: Execute the Python script to create the groung truth mappings, e.g. 
+4: Execute the Python script to create the groung truth mappings, e.g. 
     
     cd ../../../..
     python make-ref-align.py
 
 
-4: Execute the Python script to create a new experiment folder and move the data files into it, e.g.
+5: Execute the Python script to create a new experiment folder and move the data files into it, e.g.
 
     python set-experiment.py
 
 
-5: Execute the python script to convert each prompt in the experiment source csv files into French:
+6: Execute the python script to convert each prompt in the experiment source csv files into French:
 
     python translate.py
 
 
-6: Execute the Python script to enter each prompt through the suite of SAEs and pass the layer number as a parameter, e.g.
+7: Execute the Python script to enter each prompt through the suite of SAEs and pass the layer number as a parameter, e.g.
     
     python run-saes.py --layer=1
 
 This script can be executed many times and will take the highest number experiment folder.
 
 
-7: Execute the python script that takes each tensor from the SAE and creates a set of comparisons, such as weighted average vector, simple vector:
+8: Execute the python script that takes each tensor from the SAE and creates a set of comparisons, such as weighted average vector, simple vector:
 
     python compare-all-tensors.py
 
 
-8: Execute the Python script that takes the averages and then calculates the distances between vectors, e.g.
+9: Execute the Python script that takes the averages and then calculates the distances between vectors, e.g.
 
     python calculate-distances.py
     
     
-9: Execute the Python script that takes the averages and then correlates them and outputs a measure of the relationship, e.g.
+10: Execute the Python script that takes the averages and then correlates them and outputs a measure of the relationship, e.g.
 
     python calculate-correlation.py
 
-
-10: Execute the Python script to output the final report, e.g.
-
-    <create script here>
 
 
 ### Making changes
