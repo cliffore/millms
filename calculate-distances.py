@@ -6,7 +6,7 @@ import pandas as pd
 from itertools import combinations
 from scipy.spatial.distance import euclidean
 import torch
-from scipy.stats import wasserstein_distance
+#from scipy.stats import wasserstein_distance
 
 
 
@@ -84,7 +84,8 @@ def tensor_to_dense(tensor, vocab):
 cnt = 0
 for (concept1, tensor1), (concept2, tensor2) in combinations(concept_tensors.items(), 2):
     cnt = cnt + 1
-    print(cnt)
+    if cnt % 100 == 0:
+        print("English and French average: " + str(cnt))
     if tensor1.shape != tensor2.shape:
         target_len = max(len(t) for t in concept_tensors.values())
         tensor1 = resize_vector(tensor1, target_len)
@@ -127,6 +128,139 @@ for (concept1, tensor1), (concept2, tensor2) in combinations(concept_tensors.ite
 output_df = pd.DataFrame(results, columns=["concept1", "concept2", "distance", "ground_truth"])
 output_df.to_csv(output_csv, index=False)
 
-print(f"Saved distances and ground truth to: {output_csv}")
+print(f"Saved English and French average distances and averages ground truth to: {output_csv}")
+
+
+
+
+# process english data
+
+# Load all .npy files and map concept name to tensor
+concept_tensors_2 = {}
+for fname in os.listdir(data_folder):
+    if fname.endswith(".npy") and '-fr--' not in fname and  "weighted_avg" not in fname:
+        concept = fname.replace(".npy", "")  # e.g., "edas-Author"
+        tensor = np.load(os.path.join(data_folder, fname))
+        concept_tensors_2[concept] = tensor
+
+
+cnt = 0
+for (concept1, tensor1), (concept2, tensor2) in combinations(concept_tensors_2.items(), 2):
+    cnt = cnt + 1
+    if cnt % 100 == 0:
+        print("English only distances: " + str(cnt))
+    if tensor1.shape != tensor2.shape:
+        target_len = max(len(t) for t in concept_tensors_2.values())
+        tensor1 = resize_vector(tensor1, target_len)
+        tensor2 = resize_vector(tensor2, target_len)
+
+    #print(tensor1)
+    #print(tensor2)
+
+    # Flatten to shape (N, 2)
+    tensor1 = tensor1.reshape(-1, 2)
+    tensor2 = tensor2.reshape(-1, 2)
+
+    # Step 1: Build unified vocabulary of concept IDs
+    ids1 = set(tensor1[:, 0].tolist())
+    ids2 = set(tensor2[:, 0].tolist())
+    vocab = sorted(ids1.union(ids2))
+
+    # Step 2: Function to map tensor to dense vector
+    def tensor_to_dense(tensor, vocab):
+        dense = torch.zeros(len(vocab))
+        id_to_index = {cid: i for i, cid in enumerate(vocab)}
+        for row in tensor:
+            cid = int(row[0].item())
+            weight = row[1].item()
+            dense[id_to_index[cid]] += weight  # use += in case of duplicate IDs
+        return dense
+
+    # Step 3: Build dense vectors
+    dense1 = tensor_to_dense(tensor1, vocab)
+    dense2 = tensor_to_dense(tensor2, vocab)
+
+    cosine = torch.nn.functional.cosine_similarity(dense1.unsqueeze(0), dense2.unsqueeze(0)).item()
+
+    dist = cosine
+    c1 = concept1.split('--')[2]
+    c2 = concept2.split('--')[2]
+    gt = ground_truth.get((c1, c2), 0)
+    results.append([c1, c2, dist, gt])
+
+
+# Write to CSV
+output_df = pd.DataFrame(results, columns=["concept1", "concept2", "distance", "ground_truth"])
+output_df.to_csv(output_csv.replace('.csv', '--en.csv'), index=False)
+
+print(f"Saved English distances and ground truth to: {output_csv}")
+
+
+
+
+
+
+# process french data
+
+# Load all .npy files and map concept name to tensor
+concept_tensors_2 = {}
+for fname in os.listdir(data_folder):
+    if fname.endswith(".npy") and '-fr--' in fname and  "weighted_avg" not in fname:
+        concept = fname.replace(".npy", "")  # e.g., "edas-Author"
+        tensor = np.load(os.path.join(data_folder, fname))
+        concept_tensors_2[concept] = tensor
+
+
+cnt = 0
+for (concept1, tensor1), (concept2, tensor2) in combinations(concept_tensors_2.items(), 2):
+    cnt = cnt + 1
+    if cnt % 100 == 0:
+        print("French only distances: " + str(cnt))
+    if tensor1.shape != tensor2.shape:
+        target_len = max(len(t) for t in concept_tensors_2.values())
+        tensor1 = resize_vector(tensor1, target_len)
+        tensor2 = resize_vector(tensor2, target_len)
+
+    #print(tensor1)
+    #print(tensor2)
+
+    # Flatten to shape (N, 2)
+    tensor1 = tensor1.reshape(-1, 2)
+    tensor2 = tensor2.reshape(-1, 2)
+
+    # Step 1: Build unified vocabulary of concept IDs
+    ids1 = set(tensor1[:, 0].tolist())
+    ids2 = set(tensor2[:, 0].tolist())
+    vocab = sorted(ids1.union(ids2))
+
+    # Step 2: Function to map tensor to dense vector
+    def tensor_to_dense(tensor, vocab):
+        dense = torch.zeros(len(vocab))
+        id_to_index = {cid: i for i, cid in enumerate(vocab)}
+        for row in tensor:
+            cid = int(row[0].item())
+            weight = row[1].item()
+            dense[id_to_index[cid]] += weight  # use += in case of duplicate IDs
+        return dense
+
+    # Step 3: Build dense vectors
+    dense1 = tensor_to_dense(tensor1, vocab)
+    dense2 = tensor_to_dense(tensor2, vocab)
+
+    cosine = torch.nn.functional.cosine_similarity(dense1.unsqueeze(0), dense2.unsqueeze(0)).item()
+
+    dist = cosine
+    c1 = concept1.split('--')[2]
+    c2 = concept2.split('--')[2]
+    gt = ground_truth.get((c1, c2), 0)
+    results.append([c1, c2, dist, gt])
+
+
+# Write to CSV
+output_df = pd.DataFrame(results, columns=["concept1", "concept2", "distance", "ground_truth"])
+output_df.to_csv(output_csv.replace('.csv', '--fr.csv'), index=False)
+
+print(f"Saved French distances and ground truth to: {output_csv}")
+
 
 
