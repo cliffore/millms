@@ -58,6 +58,16 @@ Any other configuration may work, but cannot be supported in advance.
 
 To process this experiment using the included ontologies:
 
+1: Use the bash script to run all the necessary steps in one go. Pass in the layer parameter into the script, e.g.
+
+    chmod +x run_all.sh
+    ./run_all.sh 1
+
+
+
+
+Alternatively, to run each step in turn, follow this:
+
 
 1: Clone this repository and create new folders, e.g. s
 

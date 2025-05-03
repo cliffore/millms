@@ -3,6 +3,8 @@ from scipy.stats import pointbiserialr
 import re
 import os
 
+OutputText = ""
+
 def get_latest_ex_folder(folder_path):
     pattern = re.compile(r"^ex_(\d+)$")
     max_id = -1
@@ -36,8 +38,10 @@ df = df.iloc[:, -2:]  # Get last two columns only
 df.columns = ['value', 'target']
 
 # === Print original counts ===
-print("Original Target value counts:")
-print(df['target'].value_counts())
+OutputText = "English and French averages:"
+OutputText = OutputText + "============================================="
+OutputText = OutputText + "Original Target value counts:"
+OutputText = OutputText + str(df['target'].value_counts())
 
 # === Ensure target is binary ===
 if not set(df['target']).issubset({0, 1}):
@@ -54,25 +58,24 @@ df_balanced = pd.concat([positives, negatives_sampled])
 df_balanced = df_balanced.sample(frac=1, random_state=42).reset_index(drop=True)
 
 # === Print balanced counts ===
-print("Balanced Target value counts:")
-print(df_balanced['target'].value_counts())
+OutputText = OutputText + "Balanced Target value counts:"
+OutputText = OutputText + str(df_balanced['target'].value_counts())
 
 # === Calculate Point-Biserial Correlation on balanced data ===
 corr, p_value = pointbiserialr(df_balanced['target'], df_balanced['value'])
 
 # === Output ===
-print("Point-Biserial Correlation Analysis for average of English and French")
-print(f"Correlation Coefficient: {corr:.4f}")
-print(f"P-value: {p_value:.6f}")
+OutputText = OutputText + "Point-Biserial Correlation Analysis for average of English and French"
+OutputText = OutputText + f"Correlation Coefficient: {corr:.4f}"
+OutputText = OutputText + f"P-value: {p_value:.6f}"
 
 if p_value < 0.05:
-    print("There is a statistically significant correlation between the numeric value and the target.")
+    OutputText = OutputText + "There is a statistically significant correlation between the numeric value and the target."
 else:
-    print("No statistically significant correlation found.")
+    OutputText = OutputText + "No statistically significant correlation found."
 
 
-print()
-print()
+print(OutputText)
 
 
 # ==== CONFIGURATION ====
@@ -86,8 +89,12 @@ df = df.iloc[:, -2:]  # Get last two columns only
 df.columns = ['value', 'target']
 
 # === Print original counts ===
-print("Original Target value counts:")
-print(df['target'].value_counts())
+OutputText = OutputText + "\n"
+OutputText = OutputText + "\n"
+OutputText = OutputText + "English only correlations:"
+OutputText = OutputText + "======================================="
+OutputText = OutputText + "Original Target value counts:"
+OutputText = OutputText + str(df['target'].value_counts())
 
 # === Ensure target is binary ===
 if not set(df['target']).issubset({0, 1}):
@@ -104,24 +111,24 @@ df_balanced = pd.concat([positives, negatives_sampled])
 df_balanced = df_balanced.sample(frac=1, random_state=42).reset_index(drop=True)
 
 # === Print balanced counts ===
-print("Balanced Target value counts:")
-print(df_balanced['target'].value_counts())
+OutputText = OutputText + "Balanced Target value counts:"
+OutputText = OutputText + str(df_balanced['target'].value_counts())
 
 # === Calculate Point-Biserial Correlation on balanced data ===
 corr, p_value = pointbiserialr(df_balanced['target'], df_balanced['value'])
 
 # === Output ===
-print("Point-Biserial Correlation Analysis for English")
-print(f"Correlation Coefficient: {corr:.4f}")
-print(f"P-value: {p_value:.6f}")
+OutputText = OutputText + "Point-Biserial Correlation Analysis for English"
+OutputText = OutputText + f"Correlation Coefficient: {corr:.4f}"
+OutputText = OutputText + f"P-value: {p_value:.6f}"
 
 if p_value < 0.05:
-    print("There is a statistically significant correlation between the numeric value and the target.")
+    OutputText = OutputText + "There is a statistically significant correlation between the numeric value and the target."
 else:
-    print("No statistically significant correlation found.")
+    OutputText = OutputText + "No statistically significant correlation found."
 
 
-print()
+print(OutputText)
 print()
 
 
@@ -136,8 +143,12 @@ df = df.iloc[:, -2:]  # Get last two columns only
 df.columns = ['value', 'target']
 
 # === Print original counts ===
-print("Original Target value counts:")
-print(df['target'].value_counts())
+OutputText = OutputText + "\n"
+OutputText = OutputText + "\n"
+OutputText = OutputText + "French only correlations:"
+OutputText = OutputText + "======================================="
+OutputText = OutputText + "Original Target value counts:"
+OutputText = OutputText + str(df['target'].value_counts())
 
 # === Ensure target is binary ===
 if not set(df['target']).issubset({0, 1}):
@@ -154,18 +165,28 @@ df_balanced = pd.concat([positives, negatives_sampled])
 df_balanced = df_balanced.sample(frac=1, random_state=42).reset_index(drop=True)
 
 # === Print balanced counts ===
-print("Balanced Target value counts:")
-print(df_balanced['target'].value_counts())
+OutputText = OutputText + "Balanced Target value counts:"
+OutputText = OutputText + str(df_balanced['target'].value_counts())
 
 # === Calculate Point-Biserial Correlation on balanced data ===
 corr, p_value = pointbiserialr(df_balanced['target'], df_balanced['value'])
 
 # === Output ===
-print("Point-Biserial Correlation Analysis for French")
-print(f"Correlation Coefficient: {corr:.4f}")
-print(f"P-value: {p_value:.6f}")
+OutputText = OutputText + "Point-Biserial Correlation Analysis for French"
+OutputText = OutputText + f"Correlation Coefficient: {corr:.4f}"
+OutputText = OutputText + f"P-value: {p_value:.6f}"
 
 if p_value < 0.05:
-    print("There is a statistically significant correlation between the numeric value and the target.")
+    OutputText = OutputText + "There is a statistically significant correlation between the numeric value and the target."
 else:
-    print("No statistically significant correlation found.")
+    OutputText = OutputText + "No statistically significant correlation found."
+
+
+# Define the output file path
+output_file = "final_correlations.txt"
+
+# Write the text to the file
+with open(output_file, 'w', encoding='utf-8') as f:
+    f.write(OutputText)
+
+print(f"Text written to {output_file}")
