@@ -46,6 +46,8 @@ The output of this process should be a single csv file in the format {owl ontolo
 
     OWLAPI (the included Intellij project uses Maven to manage this library)
 
+4: An account and credentials to use the GemmaScope via the HuggingFace implementation (details can be found here: https://huggingface.co/google/gemma-scope)
+
 
 Any other configuration may work, but cannot be supported in advance.
 
@@ -87,9 +89,9 @@ To process this experiment using the included ontologies:
     python translate.py
 
 
-6: Execute the Python script to enter each prompt through the suite of SAEs, e.g.
+6: Execute the Python script to enter each prompt through the suite of SAEs and pass the layer number as a parameter, e.g.
     
-    python run-saes.py
+    python run-saes.py --layer=1
 
 This script can be executed many times and will take the highest number experiment folder.
 
