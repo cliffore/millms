@@ -66,9 +66,9 @@ To process this experiment using the included ontologies:
     mkdir data-processing/experiments
 
 
-2: Use the bash script to run all the necessary steps in one go. Pass in the layer parameter into the script (depending on permissions, run chmod +x run_all.sh first), e.g.
+2: Use the bash script to run all the necessary steps in one go. Pass in the layer parameter into the script (depending on permissions, run chmod +x run-all.sh first), e.g.
 
-    ./run_all.sh 1
+    ./run-all.sh 1
 
 Alternatively, to run each step in turn, follow this:
 
