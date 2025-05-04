@@ -27,6 +27,10 @@ python translate.py
 echo "Push the prompts through the SAE..."
 python run-saes.py --layer=$LAYER
 
+# calculate all the english v french averages
+echo "Calculate the averages between english and french concept arrays..."
+python compare-all-tensors.py
+
 # calculate all the vector distances
 echo "Calculate the vector distances between concept arrays..."
 python calculate-distances.py

@@ -193,7 +193,7 @@ for (concept1, tensor1), (concept2, tensor2) in combinations(concept_tensors_2.i
 output_df = pd.DataFrame(results, columns=["concept1", "concept2", "distance", "ground_truth"])
 output_df.to_csv(output_csv.replace('.csv', '--en.csv'), index=False)
 
-print(f"Saved English distances and ground truth to: {output_csv}")
+print(f"Saved English distances and ground truth to: {output_csv.replace('.csv', '--en.csv')}")
 
 
 
@@ -260,7 +260,7 @@ for (concept1, tensor1), (concept2, tensor2) in combinations(concept_tensors_2.i
 output_df = pd.DataFrame(results, columns=["concept1", "concept2", "distance", "ground_truth"])
 output_df.to_csv(output_csv.replace('.csv', '--fr.csv'), index=False)
 
-print(f"Saved French distances and ground truth to: {output_csv}")
+print(f"Saved French distances and ground truth to: {output_csv.replace('.csv', '--fr.csv')}")
 
 
 

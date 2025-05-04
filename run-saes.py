@@ -11,12 +11,6 @@ import pandas as pd
 import argparse
 
 
-def has_matching_file(folder_path, search_string):
-    for filename in os.listdir(folder_path):
-        if search_string in filename:
-            return True
-    return False
-
 # Create parser
 parser = argparse.ArgumentParser(description="Pass in the necessary parameters")
 
@@ -118,6 +112,25 @@ if layer_to_use >= 0 and layer_to_use < 26:
     topSAEs = []
     SAEout = ""
 
+    file = ""
+    for fil in files:
+
+        if "layer_" in fil and 'width_16k' in fil:
+            file_layer = fil.split("layer_")[1].split("/")[0]
+
+            if str(file_layer)==str(layer_to_use):
+                print("file layer:" + str(file_layer))
+                print("layer to use:" + str(layer_to_use))
+                print(fil)
+
+                this_location=fil.split("average_l0_")[1].split("/")[0]
+                print(this_location)
+
+                upper_range = 23
+                lower_range = 3
+                if int(this_location) <= upper_range and int(this_location) >= lower_range:
+                    file = fil
+
 
     input = 0
     for csv_file in finputs:
@@ -131,123 +144,98 @@ if layer_to_use >= 0 and layer_to_use < 26:
         print(prompts)
         print(concepts)
 
-        cf = 0
-        for file in files:
-            cf = cf + 1
-            if "layer_" in file:
-                this_layer = file.split("layer_")[1].split("/")[0]
+        path_to_params = hf_hub_download(repo_id=filerepo, filename=file, force_download=False)
 
-                if str(this_layer)==str(layer_to_use):
-                    print("this layer:" + str(this_layer))
-                    print("layer to use:" + str(layer_to_use))
-                    print(file)
-                    if 'width_16k' in file:
-                        this_location=file.split("average_l0_")[1].split("/")[0]
-                        print(this_location)
+        p = 0
+        
+        for prompt in prompts:
+            if prompt != "":
 
-                        upper_range = 23
-                        lower_range = 3
-                        if this_location <= upper_range and this_location >= lower_range:
-                        
-                            output_folder 
-                            search_for = 'layer_' + this_layer  
+                print(prompt)
+                # Use the tokenizer to convert it to tokens. Note that this implicitly adds a special "Beginning of Sequence" or <bos> token to the start
+                inputs = tokenizer.encode(prompt, return_tensors="pt", add_special_tokens=True).to("mps")
+                print()
+                print("input text:")
+                print(inputs)
 
-                            if not has_matching_file(output_folder, search_for):
-
-                                print(str(cf) + " >> " + file)
-
-                                path_to_params = hf_hub_download(repo_id=filerepo, filename=file, force_download=False)
-
-                                p = 0
-                                
-                                for prompt in prompts:
-                                    if prompt != "":
-
-                                        print(prompt)
-                                        # Use the tokenizer to convert it to tokens. Note that this implicitly adds a special "Beginning of Sequence" or <bos> token to the start
-                                        inputs = tokenizer.encode(prompt, return_tensors="pt", add_special_tokens=True).to("mps")
-                                        print()
-                                        print("input text:")
-                                        print(inputs)
-
-                                        # Pass it in to the model and generate text
-                                        outputs = model.generate(input_ids=inputs, max_new_tokens=50)
-                                        print()
-                                        print("first output:")
-                                        print(tokenizer.decode(outputs[0]))
+                # Pass it in to the model and generate text
+                outputs = model.generate(input_ids=inputs, max_new_tokens=50)
+                print()
+                print("first output:")
+                print(tokenizer.decode(outputs[0]))
 
 
-                                        device = torch.device('mps')
+                device = torch.device('mps')
 
-                                        params = np.load(path_to_params)
-                                        pt_params = {k: torch.from_numpy(v) for k, v in params.items()}
+                params = np.load(path_to_params)
+                pt_params = {k: torch.from_numpy(v) for k, v in params.items()}
 
-                                        print()
-                                        print("shape - residual stream SAE on file " + file + ":")
-                                        print({k:v.shape for k, v in pt_params.items()})
-
-
-                                        print()
-                                        print("weights - residual stream SAE on file " + file + ":")
-                                        print(pt_params["W_enc"].norm(dim=0))
-
-                                        sae = JumpReLUSAE(params['W_enc'].shape[0], params['W_enc'].shape[1])
-                                        print()
-                                        # amazonq-ignore-next-line
-                                        print(sae.load_state_dict(pt_params))
+                print()
+                print("shape - residual stream SAE on file " + file + ":")
+                print({k:v.shape for k, v in pt_params.items()})
 
 
-                                        def gather_residual_activations(model, target_layer, inputs):
-                                            target_act = None
-                                            def gather_target_act_hook(mod, inputs, outputs):
-                                                nonlocal target_act # make sure we can modify the target_act from the outer scope
-                                                target_act = outputs[0]
-                                                return outputs
-                                            handle = model.model.layers[target_layer].register_forward_hook(gather_target_act_hook)
-                                            _ = model.forward(inputs)
-                                            handle.remove()
-                                            return target_act
+                print()
+                print("weights - residual stream SAE on file " + file + ":")
+                print(pt_params["W_enc"].norm(dim=0))
+
+                sae = JumpReLUSAE(params['W_enc'].shape[0], params['W_enc'].shape[1])
+                print()
+                # amazonq-ignore-next-line
+                print(sae.load_state_dict(pt_params))
 
 
-                                        target_act = gather_residual_activations(model, layer_to_use, inputs)
+                def gather_residual_activations(model, target_layer, inputs):
+                    target_act = None
+                    def gather_target_act_hook(mod, inputs, outputs):
+                        nonlocal target_act # make sure we can modify the target_act from the outer scope
+                        target_act = outputs[0]
+                        return outputs
+                    handle = model.model.layers[target_layer].register_forward_hook(gather_target_act_hook)
+                    _ = model.forward(inputs)
+                    handle.remove()
+                    return target_act
 
-                                        sae.to(device)
 
-                                        sae_acts = sae.encode(target_act.to(torch.float32))
-                                        recon = sae.decode(sae_acts)
+                target_act = gather_residual_activations(model, layer_to_use, inputs)
 
-                                        print()
-                                        print("checking the model looks sensible (decent chunk of variance):")
-                                        print(1 - torch.mean((recon[:, 1:] - target_act[:, 1:].to(torch.float32)) **2) / (target_act[:, 1:].to(torch.float32).var()))
+                sae.to(device)
 
-                                        print()
-                                        print("checking the model looks sensible (L0 should be around 70):")
-                                        activs = (sae_acts > 1).sum(-1)
-                                        print(activs)
+                sae_acts = sae.encode(target_act.to(torch.float32))
+                recon = sae.decode(sae_acts)
 
-                                        values, inds = sae_acts.max(-1)
+                print()
+                print("checking the model looks sensible (decent chunk of variance):")
+                print(1 - torch.mean((recon[:, 1:] - target_act[:, 1:].to(torch.float32)) **2) / (target_act[:, 1:].to(torch.float32).var()))
 
-                                        print()
-                                        print("highest activating values on each token:")
-                                        print(values)
+                print()
+                print("checking the model looks sensible (L0 should be around 70):")
+                activs = (sae_acts > 1).sum(-1)
+                print(activs)
 
-                                        print()
-                                        print("highest activating feature on each token:")
-                                        print(inds)
+                values, inds = sae_acts.max(-1)
 
-                                        paired_tensor = torch.stack((inds, values), dim=2)
+                print()
+                print("highest activating values on each token:")
+                print(values)
 
-                                        print(concepts[p])
-                                        print(file)
-                                        print(paired_tensor)
+                print()
+                print("highest activating feature on each token:")
+                print(inds)
 
-                                        # Convert to NumPy and save
-                                        filen = csv_file.split("/")[-1].replace("ontology_classes_", "").replace(".csv", "")
-                                        np_tensor = paired_tensor.cpu().numpy()  # Move to CPU if necessary
-                                        np.save(output_folder + '/' + filen + '--' + str(p) + '--' + str(concepts[p]) + '--' + file.replace('/','-') + '.npy', np_tensor)
+                paired_tensor = torch.stack((inds, values), dim=2)
 
-                                        p = p + 1
-                                        print(p)
+                print(concepts[p])
+                print(file)
+                print(paired_tensor)
+
+                # Convert to NumPy and save
+                filen = csv_file.split("/")[-1].replace("ontology_classes_", "").replace(".csv", "")
+                np_tensor = paired_tensor.cpu().numpy()  # Move to CPU if necessary
+                np.save(output_folder + '/' + filen + '--' + str(p) + '--' + str(concepts[p]) + '--' + file.replace('/','-') + '.npy', np_tensor)
+
+                p = p + 1
+                print(p)
 
 else:
     print("Layer parameter out of range.")
