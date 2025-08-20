@@ -1,6 +1,6 @@
 # Mechanistic Interpretability - Large Language Models (MILLMs)
 
-This repository contains data and application code to prepare, process and output a PhD experiment in mechanistic intepretability.
+This repository contains data and application code to prepare, process and output a PhD experiment in mechanistic intepretability (MI).
 
 This repository is tailored to a specific set of inputs and ground-truth mappings (taken from the ontology matching task here: https://oaei.ontologymatching.org/2024/conference/index.html), but it can be amended to include any sources. The raw code is included here and there are no licence restrictions.
 
