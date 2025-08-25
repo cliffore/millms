@@ -11,6 +11,11 @@ async def translate_to_french(word):
     translation = await translator.translate(word, src="en", dest="fr")
     return translation.text
 
+async def translate_to_chinese(word):
+    translator = Translator()
+    translation = await translator.translate(word, src="en", dest="zh-CN")
+    return translation.text
+
 
 print("English to French Translator")
 
@@ -55,18 +60,28 @@ for csv_file in finputs:
     concepts = df_prompts['Concept'].tolist()
     prompts = df_prompts['Prompt'].tolist()
 
-    output = ""
+    output_f = ""
+    output_c = ""
     cn = 0
     for p in prompts:
         
         print(str(cn) + " ;; " + concepts[cn] + " ;; " + p)
+        
         french_word = asyncio.run(translate_to_french(p))
         print(french_word)
-        output = output + concepts[cn] + "," + french_word.replace(","," ") + "\n"
+        output_f = output_f + concepts[cn] + "," + french_word.replace(","," ") + "\n"
+
+        chinese_word = asyncio.run(translate_to_chinese(p))
+        print(chinese_word)
+        output_c = output_c + concepts[cn] + "," + chinese_word.replace(","," ") + "\n"
+        
         cn = cn + 1
 
 
     outfile = csv_file.replace(".csv", "-fr.csv")
     with open(outfile, 'w') as file:
-        file.write(output)
-
+        file.write(output_f)
+    
+    outfile = csv_file.replace(".csv", "-zh.csv")
+    with open(outfile, 'w') as file:
+        file.write(output_c)
