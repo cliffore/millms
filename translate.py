@@ -4,7 +4,19 @@ import asyncio
 from googletrans import Translator
 import os
 import re
+import datetime
 
+thisProcess = "translate.py"
+
+def update_log(file_path: str, message: str):
+    """Append a timestamped message to a log file."""
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    line = f"[{timestamp}] {message}\n"
+    with open(file_path, "a", encoding="utf-8") as f:
+        f.write(line)
+
+
+update_log("experiment-log.log", thisProcess + ": start")
 
 async def translate_to_french(word):
     translator = Translator()
@@ -81,7 +93,11 @@ for csv_file in finputs:
     outfile = csv_file.replace(".csv", "-fr.csv")
     with open(outfile, 'w') as file:
         file.write(output_f)
+    update_log("experiment-log.log", thisProcess + ": saved file as " + outfile)
     
     outfile = csv_file.replace(".csv", "-zh.csv")
     with open(outfile, 'w') as file:
         file.write(output_c)
+    update_log("experiment-log.log", thisProcess + ": saved file as " + outfile)
+    
+update_log("experiment-log.log", thisProcess + ": end")

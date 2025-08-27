@@ -2,6 +2,19 @@ import pandas as pd
 from scipy.stats import pointbiserialr
 import re
 import os
+import datetime
+
+thisProcess = "calculate-correlation.py"
+
+def update_log(file_path: str, message: str):
+    """Append a timestamped message to a log file."""
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    line = f"[{timestamp}] {message}\n"
+    with open(file_path, "a", encoding="utf-8") as f:
+        f.write(line)
+
+
+update_log("experiment-log.log", thisProcess + ": start")
 
 OutputText = ""
 
@@ -28,7 +41,7 @@ print(ex_folder)
 
 
 # ==== CONFIGURATION ====
-csv_path = ex_folder + "/distances_with_groundtruth.csv"
+csv_path = ex_folder + "/distances_with_groundtruth_fve.csv"
 
 # === LOAD CSV (no header) ===
 df = pd.read_csv(csv_path, header=1)
@@ -38,9 +51,9 @@ df = df.iloc[:, -2:]  # Get last two columns only
 df.columns = ['value', 'target']
 
 # === Print original counts ===
-OutputText = "English and French averages:"
-OutputText = OutputText + "============================================="
-OutputText = OutputText + "Original Target value counts:"
+OutputText = "English and French averages:\n"
+OutputText = OutputText + "=============================================\n"
+OutputText = OutputText + "Original Target value counts:\n"
 OutputText = OutputText + str(df['target'].value_counts())
 
 # === Ensure target is binary ===
@@ -78,8 +91,9 @@ else:
 print(OutputText)
 
 
+
 # ==== CONFIGURATION ====
-csv_path = ex_folder + "/distances_with_groundtruth--en.csv"
+csv_path = ex_folder + "/distances_with_groundtruth_cve.csv"
 
 # === LOAD CSV (no header) ===
 df = pd.read_csv(csv_path, header=1)
@@ -89,11 +103,62 @@ df = df.iloc[:, -2:]  # Get last two columns only
 df.columns = ['value', 'target']
 
 # === Print original counts ===
-OutputText = OutputText + "\n"
-OutputText = OutputText + "\n"
-OutputText = OutputText + "English only correlations:"
-OutputText = OutputText + "======================================="
-OutputText = OutputText + "Original Target value counts:"
+OutputText = OutputText + "\n\n"
+OutputText = OutputText + "English and Chinese averages:\n"
+OutputText = OutputText + "=============================================\n"
+OutputText = OutputText + "Original Target value counts:\n"
+OutputText = OutputText + str(df['target'].value_counts())
+
+# === Ensure target is binary ===
+if not set(df['target']).issubset({0, 1}):
+    raise ValueError("Target variable must be binary (0 or 1).")
+
+# === Balance the dataset by downsampling class 0 ===
+n_positives = df[df['target'] == 1].shape[0]
+positives = df[df['target'] == 1]
+negatives = df[df['target'] == 0]
+negatives_sampled = negatives.sample(n=n_positives, random_state=42)
+
+# Combine and shuffle
+df_balanced = pd.concat([positives, negatives_sampled])
+df_balanced = df_balanced.sample(frac=1, random_state=42).reset_index(drop=True)
+
+# === Print balanced counts ===
+OutputText = OutputText + "Balanced Target value counts:"
+OutputText = OutputText + str(df_balanced['target'].value_counts())
+
+# === Calculate Point-Biserial Correlation on balanced data ===
+corr, p_value = pointbiserialr(df_balanced['target'], df_balanced['value'])
+
+# === Output ===
+OutputText = OutputText + "Point-Biserial Correlation Analysis for average of English and Chinese"
+OutputText = OutputText + f"Correlation Coefficient: {corr:.4f}"
+OutputText = OutputText + f"P-value: {p_value:.6f}"
+
+if p_value < 0.05:
+    OutputText = OutputText + "There is a statistically significant correlation between the numeric value and the target."
+else:
+    OutputText = OutputText + "No statistically significant correlation found."
+
+
+print(OutputText)
+
+
+# ==== CONFIGURATION ====
+csv_path = ex_folder + "/distances_with_groundtruth_eo.csv"
+
+# === LOAD CSV (no header) ===
+df = pd.read_csv(csv_path, header=1)
+
+# === Extract last two columns ===
+df = df.iloc[:, -2:]  # Get last two columns only
+df.columns = ['value', 'target']
+
+# === Print original counts ===
+OutputText = OutputText + "\n\n"
+OutputText = OutputText + "English only correlations:\n"
+OutputText = OutputText + "=======================================\n"
+OutputText = OutputText + "Original Target value counts:\n"
 OutputText = OutputText + str(df['target'].value_counts())
 
 # === Ensure target is binary ===
@@ -128,12 +193,11 @@ else:
     OutputText = OutputText + "No statistically significant correlation found."
 
 
-print(OutputText)
-print()
+
 
 
 # ==== CONFIGURATION ====
-csv_path = ex_folder + "/distances_with_groundtruth--fr.csv"
+csv_path = ex_folder + "/distances_with_groundtruth_co.csv"
 
 # === LOAD CSV (no header) ===
 df = pd.read_csv(csv_path, header=1)
@@ -143,11 +207,63 @@ df = df.iloc[:, -2:]  # Get last two columns only
 df.columns = ['value', 'target']
 
 # === Print original counts ===
-OutputText = OutputText + "\n"
-OutputText = OutputText + "\n"
-OutputText = OutputText + "French only correlations:"
-OutputText = OutputText + "======================================="
-OutputText = OutputText + "Original Target value counts:"
+OutputText = OutputText + "\n\n"
+OutputText = OutputText + "Chinese only correlations:\n"
+OutputText = OutputText + "=======================================\n"
+OutputText = OutputText + "Original Target value counts:\n"
+OutputText = OutputText + str(df['target'].value_counts())
+
+# === Ensure target is binary ===
+if not set(df['target']).issubset({0, 1}):
+    raise ValueError("Target variable must be binary (0 or 1).")
+
+# === Balance the dataset by downsampling class 0 ===
+n_positives = df[df['target'] == 1].shape[0]
+positives = df[df['target'] == 1]
+negatives = df[df['target'] == 0]
+negatives_sampled = negatives.sample(n=n_positives, random_state=42)
+
+# Combine and shuffle
+df_balanced = pd.concat([positives, negatives_sampled])
+df_balanced = df_balanced.sample(frac=1, random_state=42).reset_index(drop=True)
+
+# === Print balanced counts ===
+OutputText = OutputText + "Balanced Target value counts:"
+OutputText = OutputText + str(df_balanced['target'].value_counts())
+
+# === Calculate Point-Biserial Correlation on balanced data ===
+corr, p_value = pointbiserialr(df_balanced['target'], df_balanced['value'])
+
+# === Output ===
+OutputText = OutputText + "Point-Biserial Correlation Analysis for Chinese"
+OutputText = OutputText + f"Correlation Coefficient: {corr:.4f}"
+OutputText = OutputText + f"P-value: {p_value:.6f}"
+
+if p_value < 0.05:
+    OutputText = OutputText + "There is a statistically significant correlation between the numeric value and the target."
+else:
+    OutputText = OutputText + "No statistically significant correlation found."
+
+
+
+
+
+
+# ==== CONFIGURATION ====
+csv_path = ex_folder + "/distances_with_groundtruth_fo.csv"
+
+# === LOAD CSV (no header) ===
+df = pd.read_csv(csv_path, header=1)
+
+# === Extract last two columns ===
+df = df.iloc[:, -2:]  # Get last two columns only
+df.columns = ['value', 'target']
+
+# === Print original counts ===
+OutputText = OutputText + "\n\n"
+OutputText = OutputText + "French only correlations:\n"
+OutputText = OutputText + "=======================================\n"
+OutputText = OutputText + "Original Target value counts:\n"
 OutputText = OutputText + str(df['target'].value_counts())
 
 # === Ensure target is binary ===
@@ -182,6 +298,10 @@ else:
     OutputText = OutputText + "No statistically significant correlation found."
 
 
+print(OutputText)
+print()
+
+
 # Define the output file path
 output_file = "final_correlations.txt"
 
@@ -190,3 +310,6 @@ with open(output_file, 'w', encoding='utf-8') as f:
     f.write(OutputText)
 
 print(f"Text written to {output_file}")
+
+
+update_log("experiment-log.log", thisProcess + ": start")

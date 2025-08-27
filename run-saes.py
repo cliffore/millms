@@ -9,7 +9,19 @@ import os
 import re
 import pandas as pd
 import argparse
+import datetime
 
+thisProcess = "run-saes.py"
+
+def update_log(file_path: str, message: str):
+    """Append a timestamped message to a log file."""
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    line = f"[{timestamp}] {message}\n"
+    with open(file_path, "a", encoding="utf-8") as f:
+        f.write(line)
+
+
+update_log("experiment-log.log", thisProcess + ": start")
 
 # Create parser
 parser = argparse.ArgumentParser(description="Pass in the necessary parameters")
@@ -135,6 +147,7 @@ if layer_to_use >= 0 and layer_to_use < 26:
     input = 0
     for csv_file in finputs:
 
+        update_log("experiment-log.log", thisProcess + ": processing  " + str(csv_file))
         # Read the CSV file into a pandas DataFrame
         df_prompts = pd.read_csv(csv_file, header=None, names=['Concept', 'Prompt'])
 
@@ -239,3 +252,5 @@ if layer_to_use >= 0 and layer_to_use < 26:
 
 else:
     print("Layer parameter out of range.")
+
+update_log("experiment-log.log", thisProcess + ": end")

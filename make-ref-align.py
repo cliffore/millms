@@ -3,6 +3,19 @@ import os
 import xml.etree.ElementTree as ET
 import csv
 
+import datetime
+
+thisProcess = "make-ref-align.py"
+
+def update_log(file_path: str, message: str):
+    """Append a timestamped message to a log file."""
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    line = f"[{timestamp}] {message}\n"
+    with open(file_path, "a", encoding="utf-8") as f:
+        f.write(line)
+
+
+update_log("experiment-log.log", thisProcess + ": start")
 
 # Folder containing RDF files
 input_folder = 'input-data/ground-truth'
@@ -50,3 +63,5 @@ with open(output_file, 'w', newline='', encoding='utf-8') as f:
     writer.writerows(rows)
 
 print(f"Finished! Extracted {len(rows)} mappings from {input_folder} into {output_file}")
+
+update_log("experiment-log.log", thisProcess + ": end")

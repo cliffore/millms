@@ -1,6 +1,19 @@
 import os
 import shutil
 import re
+import datetime
+
+thisProcess = "set-experiment.py"
+
+def update_log(file_path: str, message: str):
+    """Append a timestamped message to a log file."""
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    line = f"[{timestamp}] {message}\n"
+    with open(file_path, "a", encoding="utf-8") as f:
+        f.write(line)
+
+
+update_log("experiment-log.log", thisProcess + ": start")
 
 # 🔧 Set these paths
 source_folder = "data-processing"  # where CSVs are found
@@ -38,3 +51,5 @@ new_folder_path_data = os.path.join(new_folder_path, "data")
 os.makedirs(new_folder_path_data, exist_ok=True)
 
 print(f"Created new folder for data: " + new_folder_path_data)
+
+update_log("experiment-log.log", thisProcess + ": end")
